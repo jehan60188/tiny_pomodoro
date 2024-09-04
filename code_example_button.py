@@ -1,5 +1,4 @@
 #how to read tap, double tap, long tap
-
 import board
 import pwmio
 import displayio
@@ -174,9 +173,9 @@ class Button():
         
         prev_event, prev_time = self.pushes[-1]
         delta = curr_time - prev_time
-        if delta> 8:
+        if delta> 5:
             self.state = "off"
-            self.pushes = [[isdown, curr_time]]
+            self.pushes = []
             return
         if isdown and not prev_event:
             self.pushes.append([isdown, curr_time])
@@ -185,86 +184,23 @@ class Button():
             
         if len(self.pushes) < 2:
             pass #return
-        if isdown and prev_event and delta>5:
+        if isdown and prev_event and delta>1:
             self.state = "long"
-            self.pushes = [[isdown, curr_time]]
+            self.pushes = []
             return
-        if isdown and not prev_event and delta > 3:
-            self.state = "tap"
-            self.pushes =[[isdown, curr_time]]
-            return
-        if isdown and not prev_event and delta < 3:
+        if not isdown and not prev_event and delta > .5:
             if len(self.pushes) > 2:
-                if self.pushes[-2]:
-                    self.state = "double tap"
-                    self.pushes =[[isdown, curr_time]]
-                    return
-            
-        
-        return
-        if len(self.pushes) == 0:
-            self.pushes.append([isdown, curr_time])
-            return
-        if isdown:
-            prev_event, prev_time = self.pushes[-1]
-            delta = curr_time - prev_time
-            if prev_event and delta > 5:
-                self.pushes = []
-                self.state = 'long'
-                return
-            if not prev_event:
-                self.pushes.append([isdown, curr_time])
-            if len(self.pushes[-1]) < 3:
-                return
-            if self.pushes[-1] and not self.pushes[-2] and self.pushes[-3]:
-                print('double check: ', self.pushes[-1][1]-self.pushes[-2][1])
-                if self.pushes[-1][1]-self.pushes[-2][1] < 3:
-                    self.state = 'double'
+                if self.pushes[-2][0]:
+                    self.state = "tap"
                     self.pushes = []
-                    return
-        else:
-            prev_event, prev_time = self.pushes[-1]
-            delta = curr_time - prev_time
-            if prev_event and delta > 3:
-                self.state = "tap"
-                self.pushes = []
-                return
-            if len(self.pushes) < 3:
-                if prev_event:
-                    self.pushes.append([isdown, curr_time])
-                return
-            if self.pushes[-2] and delta > 3:
-                assert False, 'asdf'
-            if self.pushes[-2] and delta > 3:
-                self.state = "tap"
-                self.pushes = []
-                return
-            
-        '''
-        if isdown:
-            self.time_down += delta
-            if self.state == 'pretap':
-                if self.time_cool >=0:
-                    self.state = 'double'
-                    return
-            self.time_cool = 1
-        else:
-            if self.state == 'pretap':
-                if self.time_cool <0:
-                    self.state = 'tap'
-                    return
-            else:
-                self.state = 'off'
-            self.time_down = 0
-            self.time_cool = self.time_cool-delta
-            
-        if self.time_down > 5:
-            self.state = 'long'
-            
-        elif self.time_cool >= 0 and self.state == 'off':
-            self.state = 'pretap'
-        '''
-        
+            return
+        if isdown and not prev_event:# and delta < .2:
+            if len(self.pushes) > 2:
+                if self.pushes[-3][0]:
+                    self.state = "double tap"
+                    self.pushes = []
+            return
+        return
         
 
 S = Button(switches[0])
@@ -279,6 +215,7 @@ while True:
     prev_time = time.monotonic()
     time.sleep(0.07)
     
+
 
 
 

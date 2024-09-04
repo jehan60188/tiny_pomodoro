@@ -1,4 +1,3 @@
-#how to read tap, double tap, long tap
 import board
 import pwmio
 import displayio
@@ -136,19 +135,6 @@ def make_bitmap(splash, fname):
     splash.append(bg_sprite)
 
 
-piezo, W, H, display, splash, switches = setup()
-make_bitmap(splash, 'lib/my_tunes/tomato.txt')
-
-#_music.play_from_file(piezo, './lib/my_tunes/ffvii_raw.txt', 99*2, switches)
-#pomodoro(onoff_sec = (10,4), warning_time = 5)
-
-#_music.play_tune(piezo, _music._ffvii, _tempo= 99*2, interrupt_buttons = switches)
-select = 0
-
-timer = 0
-button_0 = 0
-prev_time = time.monotonic()
-
 class Button():
     def __init__(self, switch):
         self.switch = switch
@@ -164,6 +150,10 @@ class Button():
         self.time_down = self.time_down + delta
         pass
     
+    def reset(self):
+        self.state = "off"
+        self.pushes = []
+            
     def run(self):
         isdown = self.switch.value
         curr_time = time.monotonic()
@@ -203,19 +193,32 @@ class Button():
         return
         
 
+def set_screen(curr_screen):
+    screens = ['lib/my_tunes/tomato.txt', 'lib/my_tunes/dice.txt', 'lib/app/black.txt']
+    make_bitmap(splash, screens[curr_screen])
+     
+piezo, W, H, display, splash, switches = setup()
+make_bitmap(splash, 'lib/my_tunes/tomato.txt')
+
+#_music.play_from_file(piezo, './lib/my_tunes/ffvii_raw.txt', 99*2, switches)
+#pomodoro(onoff_sec = (10,4), warning_time = 5)
+
+#_music.play_tune(piezo, _music._ffvii, _tempo= 99*2, interrupt_buttons = switches)
+
+prev_time = time.monotonic()
+
 S = Button(switches[0])
-
+L = Button(switches[1])
+R = Button(switches[1])
+curr_screen = 0
+screens = [] #main menu, pomodoro, d20
+N = 3#len(screens)
 while True:
-    curr_time = time.monotonic()
-    delta = curr_time-prev_time
-    S.run()
-    print(S.state, S.pushes, len(S.pushes))
-    if S.state != 'off':
-        pass
-    prev_time = time.monotonic()
-    time.sleep(0.07)
+ 
+    print([x.value for x in switches])
     
-
+    time.sleep(0.1)
+    
 
 
 
